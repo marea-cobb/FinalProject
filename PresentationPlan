@@ -1,0 +1,39 @@
+Reproduce:
+1. Download the publically avaailable data: 
+  Hedenfalk et al. http://www.nejm.org/doi/full/10.1056/NEJM200102223440801
+      - Data: http://research.nhgri.nih.gov/microarray/NEJM_Supplement/
+      - Tab deliminated file
+  Brem et al. http://www.ncbi.nlm.nih.gov/pubmed/11923494
+      - Data: http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE37
+      - GEO data. May be easiest since our homework is simliar
+  Rodwell et al. http://www.ncbi.nlm.nih.gov/pubmed/15562319
+      - Data: http://smd.princeton.edu/cgi-bin//publication/viewPublication.pl?pub_no=409
+      - Data found in three files. Would hesitate to use these as would need to merge
+
+
+Notes:
+- R package found at: http://www.bioconductor.org/packages/release/bioc/html/sva.html
+- Analyze using the log scale
+
+
+Next Steps (Once below questions are answered):
+  - Read paper in detail
+  - Determine which dataset we want to work with
+      - Run analysis on dataset(s)
+  - Compile/Review Data
+  - Create presentation/Rmd
+  - PRESENT! 
+
+Todos/Questions to Ask: 
+- How many datasets to reproduce? Only need 1 
+- How long of presentation? 35 mins
+- What format do we want? Rmd
+
+
+Algorithm Steps:
+1. Remove signal due to primary variables --> Produces a residual expression matrix
+   Identify signatures of expression heterogeneity (EH) by applyng a decomposition to the matrix
+   Determine the singular vectors that completely reproduce the EH signatures
+2. Identify the subset of genes driving each EH signature through significance analysis
+3. For each subset of genes, build a surrogate variable based on full EH signature
+4. Include all significant surrogate variables as covariates in subsequenct regression analyses
