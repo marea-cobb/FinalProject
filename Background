@@ -1,0 +1,39 @@
+Gene expression studies:
+  - characterize transcriptiuonal variation with respect to measured variables of interest (enivornments, treatmetns, times, etc.)
+  - Failing to include unmodeled or unmeasured factors and gene speicifc noise can lead to a decrease power tot detect associations 
+
+Primary measured variables:
+  - variables that are explicitly modeled in the analysis of an expression study
+
+Unmodeled factors: 
+  - sorces of variation that tare explained by measured variables, but ar not explicitly includied in the statistical model 
+
+Unmeasured factors:
+  - sources of expression variation that are not measured in the course of the study
+
+Gene-sepcific noise:
+  - random fluctuations in gene expression indpenedently realized from gene to gene
+
+Expression Heterogeneity (EH):
+  - Descirbes patterns of variation due to any unmodeled factor
+  - particularly expressed in human expression data and complex systems
+
+Sources of expression variation
+  - technical
+  - environmenttal
+  - demographic
+  - genetic factors
+
+Surrogate Variable Analysis (SVA):
+  - Identify, estimate, and utilize the components of expression heterogeneity
+  - Improves accuracy and consistetncy in detecting differential expression
+  - Helps produce reproducible results in microarray studies
+  - borrows information across genes to estimate the alrge-scale effects of unmodeled factors directtly
+  - captures signatures of EH and inputs them into analysis as covariates
+
+Analysis Steps:
+  1. Remove signals of primary variables, creating a residual expression matrix (REM). Apply a decomposition to the REM to identify signatures of EH. Use a statistical test to determine singular vectors that respent significantly more variation then is expected by chance.
+  2. Identtify subset of genes driving each signature of EH thtrough analysis of associations between genes and EH signatures on REM.
+  3. For each subset of genes, build a surrogate variable based on the full EH signature of that subset in original expression data
+  4. Include all significant surrogatet variables as covariates in subsequent regression analyes
+
