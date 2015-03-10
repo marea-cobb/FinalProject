@@ -1,0 +1,82 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+Load Libraries
+```{r}
+source("http://bioconductor.org/biocLite.R")
+biocLite("Biobase")
+biocLite("limma")
+biocLite("sva")
+install.packages("data.table")
+library(Biobase)
+library(limma)
+library(data.table)
+library(sva)
+```
+Read in BRCA data
+```{r}
+brca <- read.csv("C:/Users/Gloria/Desktop/brca.csv", header=T)
+#Get participant data
+pheno <- brca[1:2,]
+rownames(pheno) <- pheno[,1]
+pheno <- pheno[,4:25]
+pheno <- t(pheno)
+pheno <- as.data.frame(pheno)
+#Get expression matrix
+ematrix <- as.matrix(brca[3:3228, 4:25])
+class(ematrix) <- "numeric" 
+#Get annotation data
+annot <- brca[3:3228, 1:3]
+colnames(annot)<- c("PlatePosition", "ImageCloneID", "Title")
+```
+Differential Expression by BRCA
+```{r}
+#Drop all ppt with "Sporadic" mutations
+pheno <- pheno[pheno$Mutation=="BRCA1" | pheno$Mutation=="BRCA2",]
+ematrix <- ematrix[, row.names(pheno),drop=FALSE]
+all(rownames(pheno)==colnames(ematrix))
+design <- model.matrix(~Mutation,pheno)
+design <- design[,1:2,drop=FALSE]
+fit <- lmFit(ematrix, design)
+eb <- eBayes(fit)
+tt <- topTable(eb , coef="MutationBRCA2", number=Inf, adjust.method="BH")
+sum(tt$adj.P.Val<0.05)
+```
+Run SVA
+```{r}
+design0 <- model.matrix(~1, pheno)
+n.sv <- num.sv(ematrix,design,method="leek")
+n.sv #10
+svobj <- sva(ematrix,design,design0,n.sv=n.sv)
+```
+Run LIMMA and include SV
+```{r}
+designSv <- cbind(design,svobj$sv)
+fitSv <- lmFit(ematrix,designSv)
+ebSv <- eBayes(fitSv)
+ttSv <- topTable(ebSv , coef="MutationBRCA2", number=Inf, adjust.method="BH")
+sum(ttSv$adj.P.Val<0.05)
+```
+
+
+
+
+
+
+
+
+
+
+
+Generate Expresion set
+```{r}
+
+var <- c("Mutation", "PlatePosition")
+desc <- c("BRCA Type", "Position on Plate")
+varInfo <- as.data.frame(cbind(var, desc))
+pd <- new("AnnotatedDataFrame", data = pheno, varMetadata = varInfo)
+
+gds <- new("ExpressionSet", exprs = ematrix, phenoData = pd)
+```
