@@ -96,12 +96,8 @@ img {
 <div id="algoirthm-overview-step-1" class="section level2">
 <h2>Algoirthm Overview: Step 1</h2>
 <ul>
-<li><p>Form estimates <span class="math">\(\hat{\mu_i}\)</span> and <span class="math">\(\hat{f_i}\)</span></p></li>
-<li><p>Remove signal of primary variables creating a residual expression matrix</p></li>
-<li><p>Normalized expression matrix <span class="math">\(X_{mxn} = (x_{1},...,x_{m})^{T}\)</span></p></li>
-<li><p>Vector representing primary variable of interest <span class="math">\(y = (y_{1},...,y_{n})^{T}\)</span></p></li>
-<li><p>Baseline level of expression <span class="math">\(\mu\)</span></p></li>
-<li><p>Residual expression matrix <span class="math">\(R\)</span> where (i,j) element is <span class="math">\(r_{ij}\)</span> <span class="math">\[
+<li><p>Form estimates <span class="math">\(\hat{\mu_i}\)</span> and <span class="math">\(\hat{f_i}\)</span> by fitting the model to <span class="math">\(x_{ij} = \mu_i + f_i(y_j) + e_{ij}\)</span></p></li>
+<li><p>Caclulate residual expression matrix <span class="math">\(R\)</span> where (i,j) element is <span class="math">\(r_{ij}\)</span> <span class="math">\[
 \begin{aligned}
 r_{i,j} = x_{ij} - \hat{\mu_i} +\hat{f_i}(y_{j})
 \end{aligned}
@@ -162,6 +158,12 @@ x_{ij} = \mu_{i} + f_{i}(y_{j} + \sum_{k=1}^K \gamma_{ki}g_{ki}+ e_{ij}^*)
 <p>Generality Model <span class="math">\(x_{ij} = \mu_{i} + f_{i}(y_{j} + e_{ij})\)</span></p>
 <p><span class="math">\(\gamma_{li}\)</span> = gene-sepcific coefficient for the lth unmodeled factor</p>
 <p>Expression for gene i on array j <span class="math">\(x_{ij} = \mu_{i} + f_{i}(y_{j} + \sum_{l=1}^L \gamma_{li}g_{li}+ e_{ij}^*)\)</span></p>
+<p>Remove signal of primary variables creating a residual expression matrix</p>
+<ul>
+<li><p>Normalized expression matrix <span class="math">\(X_{mxn} = (x_{1},...,x_{m})^{T}\)</span></p></li>
+<li><p>Vector representing primary variable of interest <span class="math">\(y = (y_{1},...,y_{n})^{T}\)</span></p></li>
+<li><p>Baseline level of expression <span class="math">\(\mu\)</span></p></li>
+</ul>
 </div>
 
 
