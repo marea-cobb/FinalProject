@@ -29,17 +29,9 @@ So, how to handle background noise?
 - Captures signatures of EH and uses them as covariates in differential expression analysis
 
 ## Algoirthm Overview: Step 1
-- Form estimates $\hat{\mu_i}$ and $\hat{f_i}$ 
+- Form estimates $\hat{\mu_i}$ and $\hat{f_i}$ by fitting the model to $x_{ij} = \mu_i + f_i(y_j) + e_{ij}$
 
-- Remove signal of primary variables creating a residual expression matrix
-
-- Normalized expression matrix $X_{mxn} = (x_{1},...,x_{m})^{T}$
-
-- Vector representing primary variable of interest $y = (y_{1},...,y_{n})^{T}$
-
-- Baseline level of expression $\mu$
-
-- Residual expression matrix $R$ where (i,j) element is $r_{ij}$
+- Caclulate residual expression matrix $R$ where (i,j) element is $r_{ij}$
 $$
 \begin{aligned}
 r_{i,j} = x_{ij} - \hat{\mu_i} +\hat{f_i}(y_{j})
@@ -103,4 +95,10 @@ $\gamma_{li}$ = gene-sepcific coefficient for the lth unmodeled factor
 
 Expression for gene i on array j $x_{ij} = \mu_{i} + f_{i}(y_{j} + \sum_{l=1}^L \gamma_{li}g_{li}+ e_{ij}^*)$
 
+ Remove signal of primary variables creating a residual expression matrix
 
+- Normalized expression matrix $X_{mxn} = (x_{1},...,x_{m})^{T}$
+
+- Vector representing primary variable of interest $y = (y_{1},...,y_{n})^{T}$
+
+- Baseline level of expression $\mu$
