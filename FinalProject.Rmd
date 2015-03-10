@@ -20,7 +20,7 @@ So, how to handle background noise?
 - Commonly expressed in human expression data and compelx systems
 - Sources include technical, environmental, demographic, genetic factors, etc.
 
-![alt text](HeterogeneityExample.jpg)
+![alt text](Images\HeterogeneityExample.jpg)
 
 ## Proposed Solution: Surrogate Variable Analysis (SVA)
 
@@ -85,7 +85,7 @@ $$
 - BRCA1 and BRCA2 tumor samples
 - Identify genes that showed differential expression across tumor subtypes
 
-![alt text](Tumor_Heterogeneity.png)
+![alt text](Images\Tumor_Heterogeneity.png)
 
 
 ## Outcome
