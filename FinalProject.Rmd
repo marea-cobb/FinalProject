@@ -1,0 +1,106 @@
+---
+title: "Capturing Heterogeneity in Gene Expression Studies by Surrogate Variable Analysis"
+author: "Gloria Chi and Marea Cobb"
+date: "March 8, 2015"
+output: html_document
+---
+
+## Gene Expression Students
+
+- Characterize transcriptional variablity
+- Models fail to include unmodeled or unmeasured factors
+- Noise can lead to a decrease power in detecting association
+
+So, how to handle background noise?
+
+
+## Expression Heterogeneity (EH)
+
+- Describes patterns of variation due to unmodeled factors
+- Commonly expressed in human expression data and compelx systems
+- Sources include technical, environmental, demographic, genetic factors, etc.
+
+![alt text](HeterogeneityExample.jpg)
+
+## Proposed Solution: Surrogate Variable Analysis (SVA)
+
+- Identifies, estimates, and utilizes the components of EH
+- Improves accuracy and consistency in detecting differential expression
+- Captures signatures of EH and uses them as covariates in differential expression analysis
+
+## Algoirthm Overview: Step 1
+- Form estimates $\hat{\mu_i}$ and $\hat{f_i}$ 
+
+- Remove signal of primary variables creating a residual expression matrix
+
+- Normalized expression matrix $X_{mxn} = (x_{1},...,x_{m})^{T}$
+
+- Vector representing primary variable of interest $y = (y_{1},...,y_{n})^{T}$
+
+- Baseline level of expression $\mu$
+
+- Residual expression matrix $R$ where (i,j) element is $r_{ij}$
+$$
+\begin{aligned}
+r_{i,j} = x_{ij} - \hat{\mu_i} +\hat{f_i}(y_{j})
+\end{aligned}
+$$
+
+- Apply a decomposition to the residual expression matrix
+  (identifies signatures of the EH)
+  
+- Use a statistical test to determine the singular vectors that represent more variation than is expected by chance 
+
+
+
+
+## Step 1 cont.: Identify orthogonal vectors $h_{k}$ and coefficients $\gamma_{ki}$
+$$
+\begin{aligned}
+x_{ij} = \mu_{i} + f_{i}(y_{j} + \sum_{l=1}^L \gamma_{li}g_{li}+ e_{ij}^*)
+\end{aligned}
+$$
+$$
+\begin{aligned}
+x_{ij} = \mu_{i} + f_{i}(y_{j} + \sum_{k=1}^K \gamma_{ki}g_{ki}+ e_{ij}^*)
+\end{aligned}
+$$
+
+
+## Algorithm Overview: Step 2
+
+- Identify subset of genes driving each signature
+
+
+## Algorithm Overview: Step 3
+
+- For each subset of genes, build a surrogate variable based on the full EH signature
+
+## Algorithm Overview: Step 4
+
+- Include all surrogate variables as covariates in subsequent regression analysis
+
+## Gene-expression Profiles in Hereditary Breast Cancer. Hedenfalk et, al.
+
+- BRCA1 and BRCA2 tumor samples
+- Identify genes that showed differential expression across tumor subtypes
+
+![alt text](Tumor_Heterogeneity.png)
+
+
+## Outcome
+
+- Accurately estimate the signatures of expression heterogeneity
+- Corrects the null distribution of p-values
+- Improves estimation of the false discovery rate
+- Robust to confounding between the primary variables and surrogate variables
+
+
+##Extra
+Generality Model $x_{ij} = \mu_{i} + f_{i}(y_{j} + e_{ij})$
+
+$\gamma_{li}$ = gene-sepcific coefficient for the lth unmodeled factor
+
+Expression for gene i on array j $x_{ij} = \mu_{i} + f_{i}(y_{j} + \sum_{l=1}^L \gamma_{li}g_{li}+ e_{ij}^*)$
+
+
