@@ -3,6 +3,48 @@ title: "Untitled"
 output: html_document
 ---
 
+##Gene-Expression Profiles in Hereditary Breast Cancer
+
+Hedenfalk I, Duggan D, Chen Y, et al. Gene-expression profiles in hereditary breast cancer. N Engl J Med. 2001 Feb 22;344(8):539-48.
+
+##Background
+BRCA1 and BRCA2 contribute to many cases of hereditary breast cancer
+
+Mutation confers a lifetime risk of breast cancer of 50-85% an ovarian cancer of 15-45%
+
+BRCA1 and BRCA2 proteins participate in DNA repair and homologous recombination
+
+Tumors with BRCA1 and BRCA2 mutations have different pathological features
+
+##BRCA1 vs. BRCA2
+BRCA1
+- High-grade cancers with high mitotic index
+- "Pushing" tumor margins
+- Lymphocytic infiltrate
+
+BRCA2
+- Heterogeneous
+- Often relatively high-grade
+- Display substantially less tubul formation
+
+##Study Sample
+- Patients with primary breast cancer
+- Family history of breast and/or ovarian cancer
+- Referred to Oncogenetic Clinic of Lund University Hospital
+- Seven BRCA1 and 9 BRCA2 participants
+
+##Microarray
+- Obtained samples of complementary DNA with verified sequences  according to build 100 of UniGene human-sequence collection
+- 6,512 cDNAs represent 5,361 unique genes
+- 3,226 passed quality control criteria for average intensity levels and spot areas
+
+##Statistical Analysis
+- Differential gene expression analysis for BRCA1 or BRCA2 mutation
+- Use LIMMA
+- Use SVA to estimate latent batch effects
+- Compare results with and without SVA
+
+
 Load Libraries
 ```{r}
 source("http://bioconductor.org/biocLite.R")
@@ -14,50 +56,102 @@ library(Biobase)
 library(limma)
 library(data.table)
 library(sva)
+library(ggplot2)
+library(pheatmap)
 ```
 Read in BRCA data
 ```{r}
-brca <- read.csv("C:/Users/Gloria/Desktop/brca.csv", header=T)
+brca <- read.csv("./BRCA.csv", header=T)
 #Get participant data
 pheno <- brca[1:2,]
 rownames(pheno) <- pheno[,1]
 pheno <- pheno[,4:25]
 pheno <- t(pheno)
 pheno <- as.data.frame(pheno)
+pheno$ptid <- rownames(pheno)
+pheno$ptid <- gsub("^[A-Z]","", rownames(pheno))
+class(pheno$ptid) <- "numeric"
+pheno[10,3] <- 15
 #Get expression matrix
 ematrix <- as.matrix(brca[3:3228, 4:25])
-class(ematrix) <- "numeric" 
+class(ematrix) <- "numeric"
 #Get annotation data
 annot <- brca[3:3228, 1:3]
 colnames(annot)<- c("PlatePosition", "ImageCloneID", "Title")
-```
-Differential Expression by BRCA
-```{r}
+annot$ImageCloneID <- as.numeric(as.character(annot$ImageCloneID))
+#Set row names for expression matrix
+rownames(ematrix) <- annot$ImageCloneID
+
 #Drop all ppt with "Sporadic" mutations
 pheno <- pheno[pheno$Mutation=="BRCA1" | pheno$Mutation=="BRCA2",]
 ematrix <- ematrix[, row.names(pheno),drop=FALSE]
 all(rownames(pheno)==colnames(ematrix))
+dim(ematrix)
+
+
+
+```
+Differential Expression by BRCA
+```{r}
 design <- model.matrix(~Mutation,pheno)
 design <- design[,1:2,drop=FALSE]
 fit <- lmFit(ematrix, design)
-eb <- eBayes(fit)
+eb <- eBayes(fit, robust=T)
 tt <- topTable(eb , coef="MutationBRCA2", number=Inf, adjust.method="BH")
-sum(tt$adj.P.Val<0.05)
+sum(tt$adj.P.Val<0.05) #23
+annot <- annot[order(annot$ImageCloneID),]
+tt <- tt[order(tt$ID),]
+all(annot$ImageCloneID==tt$ID)
+tt_annot<-cbind(annot, tt)
+write.table(tt_annot, "./tt_annot.txt", sep="\t")
 ```
 Run SVA
 ```{r}
 design0 <- model.matrix(~1, pheno)
-n.sv <- num.sv(ematrix,design,method="leek")
-n.sv #10
-svobj <- sva(ematrix,design,design0,n.sv=n.sv)
+n.sv <- num.sv(ematrix,design, method="be")
+n.sv #1
+#Chose 2-step as method described originally described in paper, but there are newer methods now
+svobj <- sva(ematrix,design,design0,n.sv=n.sv, method="two-step")
+
 ```
 Run LIMMA and include SV
 ```{r}
 designSv <- cbind(design,svobj$sv)
+pheno$sv <- svobj$sv
 fitSv <- lmFit(ematrix,designSv)
-ebSv <- eBayes(fitSv)
+ebSv <- eBayes(fitSv, robust=T)
 ttSv <- topTable(ebSv , coef="MutationBRCA2", number=Inf, adjust.method="BH")
-sum(ttSv$adj.P.Val<0.05)
+sum(ttSv$adj.P.Val<0.05) #21
+ttSv <- ttSv[order(ttSv$ID),]
+all(annot$ImageCloneID==ttSv$ID)
+ttSv_annot<-cbind(annot, ttSv)
+write.table(ttSv_annot, "./ttSv_annot.txt", sep="\t")
+```
+##Visualize Data - Heat Map
+```{r}
+#Reorder pheno
+pheno <- pheno[ order(pheno$ptid) , ]
+ematrix <- ematrix[,rownames(pheno),drop=FALSE]
+pheatmap(ematrix, cluster_rows=F, cluster_cols=F)
+
+drows <- dist(ematrix, method = "euclidean")
+hmcols<-colorRampPalette(c("red", "white", "blue"))(20)
+pheatmap(ematrix, cluster_cols=FALSE, cluster_rows=TRUE, 
+         clustering_method="ward", clustering_distance_rows = drows, 
+         scale="row", show_rownames=FALSE, border_color=NA, treeheight_row=0, 
+         color = hmcols) 
+```
+
+##Visualize Data - Plot of SV
+```{r}
+EIF2S2 <- ematrix[rownames(ematrix)==41511,]
+EIF2S2 <- t(EIF2S2)
+pheno$EIF2S2_1 <- EIF2S2[, 1]
+pheno$EIF2S2_2 <- EIF2S2[,2]
+qplot(pheno$ptid, sv, data = pheno, color = Mutation)
+qplot(pheno$ptid, pheno$EIF2S2_1, data = pheno, color = Mutation)
+qplot(pheno$ptid, pheno$EIF2S2_2, data = pheno, color = Mutation)
+
 ```
 
 
@@ -79,4 +173,29 @@ varInfo <- as.data.frame(cbind(var, desc))
 pd <- new("AnnotatedDataFrame", data = pheno, varMetadata = varInfo)
 
 gds <- new("ExpressionSet", exprs = ematrix, phenoData = pd)
+```
+Remove Outliers
+```{r}
+Remove Outliers
+outlier <- function(ppt){
+  ematrix2<-ematrix2[ematrix2[,ppt] < 20,] 
+}
+ematrix2<-ematrix
+ematrix2<-ematrix2[ematrix2[,1] < 20,]
+ematrix2<-ematrix2[ematrix2[,2] < 20,]
+ematrix2<-ematrix2[ematrix2[,3] < 20,]
+ematrix2<-ematrix2[ematrix2[,4] < 20,]
+ematrix2<-ematrix2[ematrix2[,5] < 20,]
+ematrix2<-ematrix2[ematrix2[,6] < 20,]
+ematrix2<-ematrix2[ematrix2[,7] < 20,]
+ematrix2<-ematrix2[ematrix2[,8] < 20,]
+ematrix2<-ematrix2[ematrix2[,9] < 20,]
+ematrix2<-ematrix2[ematrix2[,10] < 20,]
+ematrix2<-ematrix2[ematrix2[,11] < 20,]
+ematrix2<-ematrix2[ematrix2[,12] < 20,]
+ematrix2<-ematrix2[ematrix2[,13] < 20,]
+ematrix2<-ematrix2[ematrix2[,14] < 20,]
+ematrix2<-ematrix2[ematrix2[,15] < 20,]
+
+dim(ematrix2)
 ```
