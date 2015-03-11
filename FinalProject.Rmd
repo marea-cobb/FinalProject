@@ -5,7 +5,7 @@ date: "March 8, 2015"
 output: html_document
 ---
 
-## Gene Expression Students
+## Gene Expression Studies
 
 - Characterize transcriptional variablity
 
