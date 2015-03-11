@@ -1,11 +1,11 @@
 ---
 title: "Analysis"
-output:
+output: 
   ioslides_presentation:
-      fig_caption: yes
-      fig_retina: 1
-      keep_md: yes
-      smaller: yes
+    fig_retina: 1
+    smaller: yes
+    fig_height: 5
+    fig_width: 7
 ---
 
 ##Gene-Expression Profiles in Hereditary Breast Cancer
@@ -138,31 +138,41 @@ write.table(ttSv_annot, "./ttSv_annot.txt", sep="\t")
 #Reorder pheno
 pheno <- pheno[ order(pheno$ptid) , ]
 ematrix <- ematrix[,rownames(pheno),drop=FALSE]
-pheatmap(ematrix, cluster_rows=F, cluster_cols=F)
-
 drows <- dist(ematrix, method = "euclidean")
 hmcols<-colorRampPalette(c("red", "white", "blue"))(20)
+```
+
+##Visualize Data - Heat Map
+```{r, echo=FALSE}
 pheatmap(ematrix, cluster_cols=FALSE, cluster_rows=TRUE, 
-         clustering_method="ward", clustering_distance_rows = drows, 
+         clustering_method="ward.D2", clustering_distance_rows = drows, 
          scale="row", show_rownames=FALSE, border_color=NA, treeheight_row=0, 
          color = hmcols) 
 ```
 
 ##Visualize Data - Plot of SV
 ```{r}
+qplot(pheno$ptid, sv, data = pheno, color = Mutation)
+```
+
+##Plot pf EIF2S2 probes
+![alt text](Images\eif2s2.jpg)
+```{r}
 EIF2S2 <- ematrix[rownames(ematrix)==41511,]
 EIF2S2 <- t(EIF2S2)
 pheno$EIF2S2_1 <- EIF2S2[, 1]
 pheno$EIF2S2_2 <- EIF2S2[,2]
-qplot(pheno$ptid, sv, data = pheno, color = Mutation)
 ```
-##Plot of EIF2S2
+
+##Plot of first EIF2S2 probe
 ```{r}
 qplot(pheno$ptid, pheno$EIF2S2_1, data = pheno, color = Mutation)
-qplot(pheno$ptid, pheno$EIF2S2_2, data = pheno, color = Mutation)
-
 ```
 
+##Plot of first EIF2S2 probe
+```{r}
+qplot(pheno$ptid, pheno$EIF2S2_2, data = pheno, color = Mutation)
+```
 
 
 
