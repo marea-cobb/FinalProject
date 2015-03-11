@@ -1,6 +1,11 @@
 ---
-title: "Untitled"
-output: html_document
+title: "Analysis"
+output:
+  ioslides_presentation:
+      fig_caption: yes
+      fig_retina: 1
+      keep_md: yes
+      smaller: yes
 ---
 
 ##Gene-Expression Profiles in Hereditary Breast Cancer
@@ -8,21 +13,23 @@ output: html_document
 Hedenfalk I, Duggan D, Chen Y, et al. Gene-expression profiles in hereditary breast cancer. N Engl J Med. 2001 Feb 22;344(8):539-48.
 
 ##Background
-BRCA1 and BRCA2 contribute to many cases of hereditary breast cancer
+- BRCA1 and BRCA2 contribute to many cases of hereditary breast cancer
 
-Mutation confers a lifetime risk of breast cancer of 50-85% an ovarian cancer of 15-45%
+- Mutation confers a lifetime risk of breast cancer of 50-85% and ovarian cancer of 15-45%
 
-BRCA1 and BRCA2 proteins participate in DNA repair and homologous recombination
+- BRCA1 and BRCA2 proteins participate in DNA repair and homologous recombination
 
-Tumors with BRCA1 and BRCA2 mutations have different pathological features
+- Tumors with BRCA1 and BRCA2 mutations have different pathological features
 
 ##BRCA1 vs. BRCA2
 BRCA1
+
 - High-grade cancers with high mitotic index
 - "Pushing" tumor margins
 - Lymphocytic infiltrate
 
 BRCA2
+
 - Heterogeneous
 - Often relatively high-grade
 - Display substantially less tubul formation
@@ -44,14 +51,14 @@ BRCA2
 - Use SVA to estimate latent batch effects
 - Compare results with and without SVA
 
-
+##Load Libraries
 Load Libraries
 ```{r}
-source("http://bioconductor.org/biocLite.R")
-biocLite("Biobase")
-biocLite("limma")
-biocLite("sva")
-install.packages("data.table")
+#source("http://bioconductor.org/biocLite.R")
+#biocLite("Biobase")
+#biocLite("limma")
+#biocLite("sva")
+#install.packages("data.table")
 library(Biobase)
 library(limma)
 library(data.table)
@@ -59,7 +66,7 @@ library(sva)
 library(ggplot2)
 library(pheatmap)
 ```
-Read in BRCA data
+##Read in BRCA data
 ```{r}
 brca <- read.csv("./BRCA.csv", header=T)
 #Get participant data
@@ -87,11 +94,8 @@ pheno <- pheno[pheno$Mutation=="BRCA1" | pheno$Mutation=="BRCA2",]
 ematrix <- ematrix[, row.names(pheno),drop=FALSE]
 all(rownames(pheno)==colnames(ematrix))
 dim(ematrix)
-
-
-
 ```
-Differential Expression by BRCA
+##Differential Expression by BRCA
 ```{r}
 design <- model.matrix(~Mutation,pheno)
 design <- design[,1:2,drop=FALSE]
@@ -100,12 +104,13 @@ eb <- eBayes(fit, robust=T)
 tt <- topTable(eb , coef="MutationBRCA2", number=Inf, adjust.method="BH")
 sum(tt$adj.P.Val<0.05) #23
 annot <- annot[order(annot$ImageCloneID),]
+tt$ID <- as.numeric(tt$ID)
 tt <- tt[order(tt$ID),]
 all(annot$ImageCloneID==tt$ID)
 tt_annot<-cbind(annot, tt)
 write.table(tt_annot, "./tt_annot.txt", sep="\t")
 ```
-Run SVA
+##Run SVA
 ```{r}
 design0 <- model.matrix(~1, pheno)
 n.sv <- num.sv(ematrix,design, method="be")
@@ -114,7 +119,7 @@ n.sv #1
 svobj <- sva(ematrix,design,design0,n.sv=n.sv, method="two-step")
 
 ```
-Run LIMMA and include SV
+##Run LIMMA and include SV
 ```{r}
 designSv <- cbind(design,svobj$sv)
 pheno$sv <- svobj$sv
@@ -122,6 +127,7 @@ fitSv <- lmFit(ematrix,designSv)
 ebSv <- eBayes(fitSv, robust=T)
 ttSv <- topTable(ebSv , coef="MutationBRCA2", number=Inf, adjust.method="BH")
 sum(ttSv$adj.P.Val<0.05) #21
+ttSv$ID <- as.numeric(ttSv$ID)
 ttSv <- ttSv[order(ttSv$ID),]
 all(annot$ImageCloneID==ttSv$ID)
 ttSv_annot<-cbind(annot, ttSv)
@@ -149,6 +155,9 @@ EIF2S2 <- t(EIF2S2)
 pheno$EIF2S2_1 <- EIF2S2[, 1]
 pheno$EIF2S2_2 <- EIF2S2[,2]
 qplot(pheno$ptid, sv, data = pheno, color = Mutation)
+```
+##Plot of EIF2S2
+```{r}
 qplot(pheno$ptid, pheno$EIF2S2_1, data = pheno, color = Mutation)
 qplot(pheno$ptid, pheno$EIF2S2_2, data = pheno, color = Mutation)
 
@@ -164,38 +173,3 @@ qplot(pheno$ptid, pheno$EIF2S2_2, data = pheno, color = Mutation)
 
 
 
-Generate Expresion set
-```{r}
-
-var <- c("Mutation", "PlatePosition")
-desc <- c("BRCA Type", "Position on Plate")
-varInfo <- as.data.frame(cbind(var, desc))
-pd <- new("AnnotatedDataFrame", data = pheno, varMetadata = varInfo)
-
-gds <- new("ExpressionSet", exprs = ematrix, phenoData = pd)
-```
-Remove Outliers
-```{r}
-Remove Outliers
-outlier <- function(ppt){
-  ematrix2<-ematrix2[ematrix2[,ppt] < 20,] 
-}
-ematrix2<-ematrix
-ematrix2<-ematrix2[ematrix2[,1] < 20,]
-ematrix2<-ematrix2[ematrix2[,2] < 20,]
-ematrix2<-ematrix2[ematrix2[,3] < 20,]
-ematrix2<-ematrix2[ematrix2[,4] < 20,]
-ematrix2<-ematrix2[ematrix2[,5] < 20,]
-ematrix2<-ematrix2[ematrix2[,6] < 20,]
-ematrix2<-ematrix2[ematrix2[,7] < 20,]
-ematrix2<-ematrix2[ematrix2[,8] < 20,]
-ematrix2<-ematrix2[ematrix2[,9] < 20,]
-ematrix2<-ematrix2[ematrix2[,10] < 20,]
-ematrix2<-ematrix2[ematrix2[,11] < 20,]
-ematrix2<-ematrix2[ematrix2[,12] < 20,]
-ematrix2<-ematrix2[ematrix2[,13] < 20,]
-ematrix2<-ematrix2[ematrix2[,14] < 20,]
-ematrix2<-ematrix2[ematrix2[,15] < 20,]
-
-dim(ematrix2)
-```
