@@ -2,12 +2,12 @@
 title: "Capturing Heterogeneity in Gene Expression Studies by Surrogate Variable Analysis"
 author: "Gloria Chi and Marea Cobb"
 date: "March 8, 2015"
-output: html_document
+output: pdf_document
 ---
 
-## Gene Expression Students
+## Gene Expression Studies
 
-- Characterize transcriptional variablity
+- Characterize transcriptional variability
 
 - Models fail to include unmodeled or unmeasured factors
 
@@ -20,7 +20,7 @@ So, how do we handle background noise?
 
 - Describes patterns of variation due to unmodeled factors
 
-- Commonly expressed in human expression data and compelx systems
+- Commonly expressed in human expression data and complex systems
 
 - Sources include technical, environmental, demographic, genetic factors, etc.
 
@@ -32,9 +32,9 @@ So, how do we handle background noise?
 - Improves accuracy and consistency in detecting differential expression
 - Captures signatures of EH and uses them as covariates in differential expression analysis
 
-## Algoirthm Overview: Step 1
+## Algorithm Overview: Step 1
 
-- Remove the signaldue to the primary variables to obtain a residual expression matrix
+- Remove the signal due to the primary variables to obtain a residual expression matrix
 
     - Form estimates $\hat{\mu_i}$ and $\hat{f_i}$ by fitting the model to $x_{ij} = \mu_i + f_i(y_j) + e_{ij}^*$
 
@@ -43,9 +43,8 @@ So, how do we handle background noise?
         $r_{i,j} = x_{ij} - \hat{\mu_i} +\hat{f_i}(y_{j})$
 
 - Apply a decomposition to the residual expression matrix to identify signatures of EH
-  (identifies signatures of the EH)
   
-    - $d_l$ is the lth orthagonal signatures of EH, "eigenvalue"
+    - $d_l$ is the lth orthogonal signatures of EH, "eigenvalue"
     
     - $k$ is a gene corresponding to the signatures of EH, "eigengene"
     
@@ -104,7 +103,7 @@ $$x_{ij} = \mu_i + f_i(y_j) + \sum_{k=1}^K \gamma_{ki}\hat{h_{kj}} + e_{ij}$$
 ##Extra
 Generality Model $x_{ij} = \mu_{i} + f_{i}(y_{j} + e_{ij})$
 
-$\gamma_{li}$ = gene-sepcific coefficient for the lth unmodeled factor
+$\gamma_{li}$ = gene-specific coefficient for the lth unmodeled factor
 
 Expression for gene i on array j $x_{ij} = \mu_{i} + f_{i}(y_{j} + \sum_{l=1}^L \gamma_{li}g_{li}+ e_{ij}^*)$
 
@@ -126,3 +125,4 @@ $$
 x_{ij} = \mu_{i} + f_{i}(y_{j} + \sum_{k=1}^K \gamma_{ki}g_{ki}+ e_{ij}^*)
 \end{aligned}
 $$
+
