@@ -33,43 +33,30 @@ So, how do we handle background noise?
 
 
 ##Algoirthm Overview: Step 1
-
 - Remove the signal due to the primary variables to obtain a residual expression matrix
-
     - Form estimates $\hat{\mu_i}$ and $\hat{f_i}$ by fitting the model to $x_{ij} = \mu_i + f_i(y_j) + e_{ij}^*$
-
-    - Caclulate residual expression matrix $R$ where (i,j) element is $r_{ij}$
+    - Caclulate residual expression matrix $R$ where (i,j) element is $r_{ij}$   
+    $r_{i,j} = x_{ij} - \hat{\mu_i} +\hat{f_i}(y_{j})$
     
-        $r_{i,j} = x_{ij} - \hat{\mu_i} +\hat{f_i}(y_{j})$
-
-- Apply a decomposition to the residual expression matrix to identify signatures of EH
-  
-    - $d_l$ is the lth orthogonal signatures of EH, "eigenvalue"
-    
-    - $k$ is a gene corresponding to the signatures of EH, "eigengene"
-    
-    - Calculate a null statistic for each gene
-    
+## Step 1 Continuted
+- Apply a decomposition to the residual expression matrix to identify signatures of EH 
+    - $d_l$ is the lth orthogonal signatures of EH, "eigenvalue"   
+    - $k$ is a gene corresponding to the signatures of EH, "eigengene"    
+    - Calculate a null statistic for each gene   
     $$T_k = \dfrac{d_k^2}{\sum_{l=1}^{n-df} d_{0l}^2}$$
-  
-- Use a statistical test to determine the singular vectors that represent more variation than is expected by chance 
-    
-    - calculate a p-value for the eigengene k
-    
+- Use a statistical test to determine the singular vectors that represent more variation than is expected by chance    
+    - calculate a p-value for the eigengene k    
     $$p_k = \dfrac{\#{T_k^{0b} >= T_k; b = 1,...,B}}{B}$$
 
 
 ## Algorithm Overview: Step 2
 
 - Identify subset of genes driving each signature
-
-- Repeat step 1 including the signature eigenvalues
-
+- Run an association analysis between factors and genes.
 
 ## Algorithm Overview: Step 3
 
 - For each subset of genes, build a surrogate variable based on the full EH signature
-
 - Build matrix containing all genes associated with the residual eigengene
 
 ## Algorithm Overview: Step 4
@@ -81,12 +68,12 @@ $$x_{ij} = \mu_i + f_i(y_j) + \sum_{k=1}^K \gamma_{ki}\hat{h_{kj}} + e_{ij}$$
 
 ---
 title: "Analysis"
-output:
+output: 
   ioslides_presentation:
-      fig_caption: yes
-      fig_retina: 1
-      keep_md: yes
-      smaller: yes
+    fig_retina: 1
+    smaller: yes
+    fig_height: 5
+    fig_width: 7
 ---
 
 ##Gene-Expression Profiles in Hereditary Breast Cancer
@@ -140,7 +127,7 @@ Load Libraries
 #biocLite("limma")
 #biocLite("sva")
 #install.packages("data.table")
-# library(Biobase)
+library(Biobase)
 library(limma)
 library(data.table)
 library(sva)
@@ -219,35 +206,46 @@ write.table(ttSv_annot, "./ttSv_annot.txt", sep="\t")
 #Reorder pheno
 pheno <- pheno[ order(pheno$ptid) , ]
 ematrix <- ematrix[,rownames(pheno),drop=FALSE]
-pheatmap(ematrix, cluster_rows=F, cluster_cols=F)
-
 drows <- dist(ematrix, method = "euclidean")
 hmcols<-colorRampPalette(c("red", "white", "blue"))(20)
+```
+
+##Visualize Data - Heat Map
+```{r, echo=FALSE}
 pheatmap(ematrix, cluster_cols=FALSE, cluster_rows=TRUE, 
-         clustering_method="ward", clustering_distance_rows = drows, 
+         clustering_method="ward.D2", clustering_distance_rows = drows, 
          scale="row", show_rownames=FALSE, border_color=NA, treeheight_row=0, 
          color = hmcols) 
 ```
 
 ##Visualize Data - Plot of SV
 ```{r}
+qplot(pheno$ptid, sv, data = pheno, color = Mutation)
+```
+
+##Plot pf EIF2S2 probes
+![alt text](Images\eif2s2.jpg)
+```{r}
 EIF2S2 <- ematrix[rownames(ematrix)==41511,]
 EIF2S2 <- t(EIF2S2)
 pheno$EIF2S2_1 <- EIF2S2[, 1]
 pheno$EIF2S2_2 <- EIF2S2[,2]
-qplot(pheno$ptid, sv, data = pheno, color = Mutation)
 ```
 
-##Plot of EIF2S2
+##Plot of first EIF2S2 probe
 ```{r}
 qplot(pheno$ptid, pheno$EIF2S2_1, data = pheno, color = Mutation)
-qplot(pheno$ptid, pheno$EIF2S2_2, data = pheno, color = Mutation)
+```
 
+##Plot of first EIF2S2 probe
+```{r}
+qplot(pheno$ptid, pheno$EIF2S2_2, data = pheno, color = Mutation)
 ```
 
 
 
 
+##Questions?
 
 
 
