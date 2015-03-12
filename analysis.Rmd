@@ -19,36 +19,24 @@ Hedenfalk I, Duggan D, Chen Y, et al. Gene-expression profiles in hereditary bre
 
 - BRCA1 and BRCA2 proteins participate in DNA repair and homologous recombination
 
-- Tumors with BRCA1 and BRCA2 mutations have different pathological features
+- Tumors with BRCA1 and BRCA2 mutations have different histopathological features
 
-##BRCA1 vs. BRCA2
-BRCA1
-
-- High-grade cancers with high mitotic index
-- "Pushing" tumor margins
-- Lymphocytic infiltrate
-
-BRCA2
-
-- Heterogeneous
-- Often relatively high-grade
-- Display substantially less tubul formation
+- What are the gene expression profiles of tumors with BRCA1 and BRCA2 mutations?
 
 ##Study Sample
 - Patients with primary breast cancer
 - Family history of breast and/or ovarian cancer
 - Referred to Oncogenetic Clinic of Lund University Hospital
-- Seven BRCA1 and 9 BRCA2 participants
+- Seven BRCA1 and eight BRCA2 participants
 
-##Microarray
-- Obtained samples of complementary DNA with verified sequences  according to build 100 of UniGene human-sequence collection
+Microarray
 - 6,512 cDNAs represent 5,361 unique genes
 - 3,226 passed quality control criteria for average intensity levels and spot areas
 
 ##Statistical Analysis
 - Differential gene expression analysis for BRCA1 or BRCA2 mutation
 - Use LIMMA
-- Use SVA to estimate latent batch effects
+- Use SVA to estimate latent or unmodeled factors
 - Compare results with and without SVA
 
 ##Load Libraries
@@ -95,7 +83,23 @@ ematrix <- ematrix[, row.names(pheno),drop=FALSE]
 all(rownames(pheno)==colnames(ematrix))
 dim(ematrix)
 ```
-##Differential Expression by BRCA
+
+##Heat Map
+```{r, echo=FALSE}
+#Reorder pheno
+pheno2<-pheno
+pheno <- pheno[ order(pheno$ptid) , ]
+ematrix <- ematrix[,rownames(pheno),drop=FALSE]
+drows <- dist(ematrix, method = "euclidean")
+hmcols<-colorRampPalette(c("red", "white", "blue"))(20)
+
+pheatmap(ematrix, cluster_cols=FALSE, cluster_rows=TRUE, 
+         clustering_method="ward.D2", clustering_distance_rows = drows, 
+         scale="row", show_rownames=FALSE, border_color=NA, treeheight_row=0, 
+         color = hmcols) 
+```
+
+##Differential Expression, no SV adjustment
 ```{r}
 design <- model.matrix(~Mutation,pheno)
 design <- design[,1:2,drop=FALSE]
@@ -119,7 +123,7 @@ n.sv #1
 svobj <- sva(ematrix,design,design0,n.sv=n.sv, method="two-step")
 
 ```
-##Run LIMMA and include SV
+##Differential Expression, SV adjustment
 ```{r}
 designSv <- cbind(design,svobj$sv)
 pheno$sv <- svobj$sv
@@ -133,50 +137,50 @@ all(annot$ImageCloneID==ttSv$ID)
 ttSv_annot<-cbind(annot, ttSv)
 write.table(ttSv_annot, "./ttSv_annot.txt", sep="\t")
 ```
-##Visualize Data - Heat Map
-```{r}
-#Reorder pheno
-pheno <- pheno[ order(pheno$ptid) , ]
-ematrix <- ematrix[,rownames(pheno),drop=FALSE]
-drows <- dist(ematrix, method = "euclidean")
-hmcols<-colorRampPalette(c("red", "white", "blue"))(20)
-```
 
-##Visualize Data - Heat Map
-```{r, echo=FALSE}
-pheatmap(ematrix, cluster_cols=FALSE, cluster_rows=TRUE, 
-         clustering_method="ward.D2", clustering_distance_rows = drows, 
-         scale="row", show_rownames=FALSE, border_color=NA, treeheight_row=0, 
-         color = hmcols) 
-```
-
-##Visualize Data - Plot of SV
+##Plot of SV
 ```{r}
 qplot(pheno$ptid, sv, data = pheno, color = Mutation)
 ```
 
-##Plot pf EIF2S2 probes
+##Plot of EIF2S2 gene
 ![alt text](Images\eif2s2.jpg)
-```{r}
+
+Panel A is plot of surrogate variable and participant ID.
+Panel B is plot of EIF2S2 expression and participant ID.
+```{r, echo=FALSE}
 EIF2S2 <- ematrix[rownames(ematrix)==41511,]
 EIF2S2 <- t(EIF2S2)
 pheno$EIF2S2_1 <- EIF2S2[, 1]
+pheno$log_EIF2S2_1 <- log(pheno$EIF2S2_1)
 pheno$EIF2S2_2 <- EIF2S2[,2]
+pheno$log_EIF2S2_2 <- log2(pheno$EIF2S2_2)
 ```
 
-##Plot of first EIF2S2 probe
+##Plot of First EIF2S2 cDNA
 ```{r}
-qplot(pheno$ptid, pheno$EIF2S2_1, data = pheno, color = Mutation)
+qplot(pheno$ptid, pheno$log_EIF2S2_1, data = pheno, color = Mutation)
 ```
 
-##Plot of first EIF2S2 probe
+##Plot of Second EIF2S2 cDNA
 ```{r}
-qplot(pheno$ptid, pheno$EIF2S2_2, data = pheno, color = Mutation)
+qplot(pheno$ptid, pheno$log_EIF2S2_2, data = pheno, color = Mutation)
 ```
 
 
+##Gene Rankings with and without SVA
+```{r, echo=FALSE}
+tt_annot <- tt_annot[order(tt_annot$adj.P.Val),]
+tt_annot$rank_nosva <- 1:length(tt_annot$adj.P.Val)
+ttSv_annot <- ttSv_annot[order(ttSv_annot$adj.P.Val),]
+ttSv_annot$rank_sva <- 1:length(ttSv_annot$adj.P.Val)
 
+tt_annot <- tt_annot[order(tt_annot$ImageCloneID),]
+ttSv_annot <- ttSv_annot[order(ttSv_annot$ImageCloneID),]
+generank <- cbind(tt_annot, ttSv_annot)
 
+qplot(rank_nosva, rank_sva, data = generank)+geom_abline(intercept=0, slope=1, color="red")
+```
 
 
 
