@@ -30,7 +30,7 @@ Hedenfalk I, Duggan D, Chen Y, et al. Gene-expression profiles in hereditary bre
 - Seven BRCA1 and eight BRCA2 participants
 
 Microarray
-- 6,512 cDNAs represent 5,361 unique genes
+- 6,512 cDNA probes represent 5,361 unique genes
 - 3,226 passed quality control criteria for average intensity levels and spot areas
 
 ##Statistical Analysis
@@ -157,12 +157,12 @@ pheno$EIF2S2_2 <- EIF2S2[,2]
 pheno$log_EIF2S2_2 <- log2(pheno$EIF2S2_2)
 ```
 
-##Plot of First EIF2S2 cDNA
+##Plot of First EIF2S2 probe
 ```{r}
 qplot(pheno$ptid, pheno$log_EIF2S2_1, data = pheno, color = Mutation)
 ```
 
-##Plot of Second EIF2S2 cDNA
+##Plot of Second EIF2S2 probe
 ```{r}
 qplot(pheno$ptid, pheno$log_EIF2S2_2, data = pheno, color = Mutation)
 ```
