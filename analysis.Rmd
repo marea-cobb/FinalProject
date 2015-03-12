@@ -182,18 +182,16 @@ generank <- cbind(tt_annot, ttSv_annot)
 qplot(rank_nosva, rank_sva, data = generank)+geom_abline(intercept=0, slope=1, color="red")
 ```
 
-##Top Genes no SVA
+##Top Genes
+No SVA
 ```{r, echo=FALSE}
 tt_annot <- tt_annot[order(tt_annot$adj.P.Val),]
-tt_annot$Title <- as.character(tt_annot$Title)
-data.frame(head(tt_annot$Title, n=10), head(tt_annot$adj.P.Val, n=10))
+head(as.character(tt_annot$Title))
 ```
-
-##Top Genes SVA
+SVA
 ```{r, echo=FALSE}
 ttSv_annot <- ttSv_annot[order(ttSv_annot$adj.P.Val),]
-ttSv_annot$Title <- as.character(ttSv_annot$Title)
-data.frame(head(ttSv_annot$Title, n=10), head(ttSv_annot$adj.P.Val, n=10))
+head(as.character(ttSv_annot$Title))
 ```
 
 ##Conclusion
