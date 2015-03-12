@@ -182,6 +182,14 @@ generank <- cbind(tt_annot, ttSv_annot)
 qplot(rank_nosva, rank_sva, data = generank)+geom_abline(intercept=0, slope=1, color="red")
 ```
 
+##Conclusion
+- Many genetic, environmental, demographic, and technical factors may have substantial effects on gene expression levels
+- There may be factors that are unknown, unmeasured, or too complicated to capture through simple models
+- Not incorporating these sources of heterogeneity can reduce power, induce unwanted dependence across genes, and/or introduce sources of spurious signals to many genes
+- SVA is used to estimate factors of unmodeled expression heterogeneity
+- Estimated surrogate variables can be applied in conjunctions with standard analysis techniques
+
+
 
 
 
